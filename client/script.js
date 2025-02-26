@@ -1,3 +1,6 @@
+// API_URL = 'http://localhost:4000/api/currencies'
+API_URL = 'https://xchanger-server.vercel.app'
+
 let callIndex = -1
 const states = [];
 
@@ -27,7 +30,7 @@ let [currencyData, setCurrencyData] = useState([]);
 let [selectedCurrencies, setSelectedCurrencies] = useState({});
 
 function fetchCurrencyData() {
-    return fetch("http://localhost:4000/api/currencies")
+    return fetch(API_URL)
         .then(response => response.json())
         .then(data => {
             setCurrencyData(data);
