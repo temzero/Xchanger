@@ -1,5 +1,6 @@
 // API_URL = 'http://localhost:4000/api/currencies'
-API_URL = 'https://xchanger-server.vercel.app'
+API_URL = 'https://xchanger-server.vercel.app/api/currencies'
+
 
 let callIndex = -1
 const states = [];

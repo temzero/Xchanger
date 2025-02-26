@@ -5,6 +5,10 @@ const cors = require("cors");
 const app = express();
 app.use(cors());
 
+const path = require("path");
+app.use(express.static(path.join(__dirname, "public")));
+
+
 const API_URL_CRYPTO = process.env.API_URL_CRYPTO;
 const API_URL_FOREX = process.env.API_URL_FOREX;
 const API_URL_GOLD = process.env.API_URL_GOLD;
@@ -148,7 +152,45 @@ setInterval(updatePrices, 3600888);
 updatePrices();
 
 app.get("/", (req, res) => {
-    res.send("Currency database server is running");
+    res.send(`
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Currency Database</title>
+            <style>
+                @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+                body {
+                    background-color: black;
+                    color: #63E6BE;
+                    text-align: center;
+                    padding: 24px;
+                    font-family: "Montserrat", serif;
+                    font-weight: 400;
+                }
+                h1 {
+                    font-size: 44px;
+                    font-family: "Montserrat", serif;
+                    font-weight: 400;
+                }
+                a {
+                    font-size: 20px;
+                    color: grey;
+                    text-decoration: none;
+                }
+                a:hover {
+                    color: white;
+                }
+            </style>
+        </head>
+        <body>
+            <h1>Currency Database Server</h1>
+            <p><a href="/api/currencies">Get now!</a></p>
+        </body>
+        </html>
+    `);
 });
 
 // API endpoint to fetch all currency data
@@ -156,9 +198,9 @@ app.get("/api/currencies", (req, res) => {
     res.json(currencyData);
 });
 
-// const PORT = process.env.PORT || 5000;
-// app.listen(PORT, () => {
-//     console.log(`Server running on http://localhost:${PORT}`);
-// });
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+});
 
 module.exports = app;
