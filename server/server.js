@@ -3,11 +3,14 @@ const express = require("express");
 const cors = require("cors");
 
 const app = express();
-app.use(cors());
+app.use(cors({
+    origin: "*",
+    methods: "GET,POST",
+    allowedHeaders: "*"
+}));
 
 const path = require("path");
 app.use(express.static(path.join(__dirname, "public")));
-
 
 const API_URL_CRYPTO = process.env.API_URL_CRYPTO;
 const API_URL_FOREX = process.env.API_URL_FOREX;
@@ -86,18 +89,19 @@ const currencyData = [
     ...createCurrencyData(commodities)
 ];
 
-
 function fetchCryptoPrices() {
     return fetch(API_URL_CRYPTO)
         .then(response => response.json())
         .then(data => {
-            currencyData.forEach(currency => {
-                const lowerCaseName = currency.name.toLowerCase();
-                if (data[lowerCaseName]?.usd) {
-                    currency.price = data[lowerCaseName].usd;
-                }
-            });
-            console.log("Crypto prices updated.");
+            if (data) {
+                currencyData.forEach(currency => {
+                    const lowerCaseName = currency.name.toLowerCase();
+                    if (data[lowerCaseName]?.usd) {
+                        currency.price = data[lowerCaseName].usd;
+                    }
+                });
+                console.log("Crypto prices updated.");
+            }
         })
         .catch(error => console.error("Error fetching crypto prices:", error));
 }
@@ -106,14 +110,14 @@ function fetchForexRates() {
     return fetch(API_URL_FOREX)
         .then(response => response.json())
         .then(data => {
-            if (data.rates) {
+            if (data?.rates) {
                 currencyData.forEach(currency => {
                     if (data.rates[currency.code]) {
                         currency.price = 1 / data.rates[currency.code];
                     }
                 });
+                console.log("Forex prices updated.");
             }
-            console.log("Forex prices updated.");
         })
         .catch(error => console.error("Error fetching forex prices:", error));
 }
@@ -125,17 +129,18 @@ function fetchMetalPrices() {
         fetch(metalURL)
             .then(response => response.json())
             .then(data => {
-                currencyData.forEach(currency => {
-                    if (data.name.toLowerCase() === currency.code.toLowerCase()) {
-                        currency.price = data.price;
-                    }
-                });
-                console.log(`${data.name} price updated.`);
+                if (data?.name && data?.price) {
+                    currencyData.forEach(currency => {
+                        if (data.name.toLowerCase() === currency.code.toLowerCase()) {
+                            currency.price = data.price;
+                        }
+                    });
+                    console.log(`${data.name} price updated.`);
+                }
             })
             .catch(error => console.error(`Error fetching metals price:`, error))
         ));
 }
-
 
 async function updatePrices() {
     await Promise.allSettled([
@@ -145,11 +150,8 @@ async function updatePrices() {
     ]);
 }
 
-// Update prices every 60 minutes
-setInterval(updatePrices, 3600888);
-
-// Initial Fetch
 updatePrices();
+setInterval(updatePrices, 3600888); // 1hour
 
 app.get("/", (req, res) => {
     res.send(`
@@ -161,7 +163,6 @@ app.get("/", (req, res) => {
             <title>Currency Database</title>
             <style>
                 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
-
                 body {
                     background-color: black;
                     color: #63E6BE;
@@ -193,14 +194,13 @@ app.get("/", (req, res) => {
     `);
 });
 
-// API endpoint to fetch all currency data
 app.get("/api/currencies", (req, res) => {
     res.json(currencyData);
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-});
+// const PORT = process.env.PORT || 5000;
+// app.listen(PORT, () => {
+//     console.log(`Server running on http://localhost:${PORT}`);
+// });
 
 module.exports = app;

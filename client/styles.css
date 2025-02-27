@@ -163,7 +163,7 @@ body, html {
 .input-field {
     width: 100%;
     font-size: 2rem;
-    padding: 8px;
+    padding: 10px;
     border: none;
     background: transparent;
     outline: none;
@@ -193,6 +193,7 @@ body, html {
     padding: 16px 8px;
     border: none;
     background: transparent;
+    border-radius: 4px;
     position: relative;
 }
 
